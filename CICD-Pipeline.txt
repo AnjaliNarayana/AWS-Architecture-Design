@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CI/CD Pipeline
+
+Resources:
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: MyPipeline
+      RoleArn: !GetAtt CodePipelineRole.Arn # IAM role for CodePipeline
+      Stages:
+        - Name: Source  # Stage 1: Get the source code from GitHub, we can use codecommit also
+          Actions:
+            - Name: GitHubSource  
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: GitHub  
+                Version: 1
+              Configuration:
+                Owner: <AnjaliNarayna> #you can provide your username and repository
+                Repo: <CICD Pipeline>
+                Branch: main
+                OAuthToken: !Ref GitHubOAuthToken # Store securely!
+              OutputArtifacts:  # Output of this stage
+                - Name: SourceOutput
+
+        - Name: Build  # Stage 2: Build the code
+          Actions:
+            - Name: CodeBuildProject  # Use CodeBuild
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref MyCodeBuildProject # Reference CodeBuild project
+              InputArtifacts:  # Input to this stage (from Source stage)
+                - Name: SourceOutput
+              OutputArtifacts:  # Output of this stage
+                - Name: BuildOutput
+
+        - Name: Deploy  # Stage 3: Deploy
+          Actions:
+            - Name: S3Deploy  # Example: Deploy to S3
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: S3
+                Version: 1
+              Configuration:
+                BucketName: !Ref MyS3Bucket
+                InputArtifacts:
+                  - Name: BuildOutput
+
+# CodeBuild Project Definition
+  MyCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: MyBuildProject
+      Artifacts:  # Where CodeBuild stores output
+        Type: S3
+        Location: !Ref CodeBuildArtifactBucket
+        Name: build-output.zip
+      Environment:
+        Type: LINUX_CONTAINER
+        Image: <Your_Build_Image> # e.g., amazon/aws-cli, node:latest, python:latest
+      Source:
+        Type: CODEPIPELINE  # Input from CodePipeline
+      BuildSpec: buildspec.yml # The build instructions
+
+# S3 Bucket for Website (Deploy target)
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+
+# S3 Bucket for CodeBuild Artifacts
+  CodeBuildArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref CodeBuildArtifactBucketName
+
+# IAM Role for CodePipeline (Grant necessary permissions!)
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    # create a role and assign permissions for codepipeline
