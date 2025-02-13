@@ -1,0 +1,93 @@
+1. Front-End Hosting:
+Amazon S3 (Simple Storage Service):
+Function: Hosts the static files of the front-end application, such as HTML, CSS, JavaScript, and images.
+Usage: S3 is highly scalable and durable, making it ideal for serving static assets.
+Deployment: The static files are uploaded to an S3 bucket that serves as the hosting for your front-end.
+Amazon CloudFront:
+Function: Distributes the static content stored in S3 across the globe to users.
+Usage: By using CloudFront, content is cached at edge locations, reducing latency and delivering the content faster to end-users.
+Benefit: This enables low-latency access for users regardless of their geographical location.
+Amazon Route 53:
+Function: Provides DNS (Domain Name System) routing.
+Usage: Route 53 resolves domain names (e.g., www.yoursite.com) to the CloudFront distribution.
+Benefit: It ensures users are directed to the correct CloudFront distribution, improving routing reliability.
+AWS Certificate Manager (ACM):
+Function: Manages SSL/TLS certificates for secure HTTPS connections.
+Usage: It ensures that the data between users and CloudFront is encrypted via HTTPS.
+Benefit: SSL/TLS certificates are automatically provisioned, deployed, and renewed by ACM, simplifying security management.
+
+2. Backend API:
+This section contains the serverless backend logic and API for interacting with your application.
+Amazon API Gateway:
+Function: Exposes a RESTful API to users (or other services) to interact with the back-end system.
+Usage: API Gateway serves as the entry point for incoming API requests.
+Benefit: It handles request routing, authorization, traffic management, and monitoring for the APIs.
+AWS Lambda:
+Function: Executes backend logic in a serverless manner, triggered by API Gateway requests.
+Usage: The backend code runs in Lambda functions, which are event-driven and scale automatically.
+Benefit: Lambda abstracts away infrastructure management, reducing overhead and scaling automatically based on demand.
+Amazon Cognito:
+Function: Provides user authentication and access control.
+Usage: Cognito allows users to sign up, sign in, and access resources securely using OAuth, SAML, or custom authentication mechanisms.
+Benefit: It integrates seamlessly with API Gateway and Lambda, simplifying user management.
+
+3. Database Layer:
+Amazon RDS (Relational Database Service):
+Function: A fully managed relational database (either MySQL or PostgreSQL) to store structured data.
+Usage: The backend services (Lambda functions) interact with the RDS database to read/write data.
+Benefit: RDS takes care of database management tasks such as patching, backups, and replication, allowing you to focus on the application.
+Multi-AZ Deployment:
+Function: RDS is deployed in multiple availability zones (AZs) for high availability.
+Usage: In case of a failure in one AZ, RDS automatically switches to another AZ.
+Benefit: This provides automatic failover and ensures high availability for your database.
+
+4. Networking and Security:
+Amazon VPC (Virtual Private Cloud):
+Function: VPC is a logically isolated network within AWS where your resources reside.
+Usage: All the AWS services in the architecture are placed within this VPC for controlled network traffic.
+Benefit: You can control IP address ranges, subnets, routing tables, and network gateways for better security and resource isolation.
+Public Subnets: Used for resources that must be publicly accessible, such as NAT Gateways.
+Usage: Public subnets allow outbound traffic to the internet but do not directly expose services like the database or Lambda to the internet.
+Private Subnets: Used for internal resources like Lambda functions and the RDS database.
+Usage: Resources in private subnets cannot be accessed directly from the internet. They can only interact with publicly accessible resources (like API Gateway) through secure routes.
+
+
+IAM Roles (Identity and Access Management):
+Function: IAM manages access control to AWS resources.
+Usage: Lambda functions, RDS, and other services are assigned IAM roles with the required permissions to access AWS services securely.
+Benefit: Fine-grained access control ensures that only authorized services and users can access your resources.
+KMS (Key Management Service):
+Function: Manages encryption keys to protect data at rest.
+Usage: Sensitive data stored in services like RDS, S3, and Lambda can be encrypted using KMS.
+Benefit: KMS provides centralized control over your encryption keys for security and compliance.
+
+5. CI/CD Pipeline:
+AWS CodePipeline:
+Function: Orchestrates the entire CI/CD pipeline, automating the process of building, testing, and deploying your application.
+Usage: CodePipeline manages the flow from code changes to deployment, integrating with CodeBuild and CodeDeploy for continuous integration and deployment.
+Benefit: It automates the application release process, reducing manual intervention and speeding up the deployment cycle.
+AWS CodeBuild:
+Function: Builds the front-end and tests the back-end code.
+Usage: CodeBuild compiles the source code, runs unit tests, and produces artifacts (such as a packaged front-end to be deployed to S3 or Lambda deployment packages).
+Benefit: CodeBuild scales automatically to handle multiple build requests.
+AWS CodeDeploy:
+Function: Deploys the front-end to S3 and updates Lambda functions.
+Usage: CodeDeploy takes the build artifacts from CodeBuild and deploys them to the appropriate AWS service, ensuring that the right version is deployed to production.
+Benefit: CodeDeploy automates deployments, reducing the chance of human error.
+
+6. Monitoring and Logging:
+This section provides observability and tracking for the application’s behavior.
+CloudWatch:
+Function: Provides logging, monitoring, and alarms for all AWS services.
+Usage: CloudWatch collects logs and metrics from Lambda, API Gateway, and other AWS services, allowing you to monitor application health and troubleshoot issues.
+Benefit: CloudWatch helps ensure application reliability and uptime by tracking performance metrics, errors, and other critical data.
+X-Ray:
+Function: Provides tracing for requests that pass through various services.
+Usage: X-Ray traces the flow of requests through API Gateway, Lambda, and other components, helping identify performance bottlenecks or failures.
+Benefit: X-Ray helps with debugging and optimizing the performance of the backend.
+CloudTrail:
+Function: Logs all API calls made within your AWS account for auditing purposes.
+Usage: CloudTrail captures details of all AWS API interactions, allowing you to track who did what, when, and from where.
+Benefit: CloudTrail is essential for security, compliance, and troubleshooting by providing a complete history of AWS API activity.
+
+Note: We can use prometheus and grafana as well for monitoring, logging and creating alarms.
